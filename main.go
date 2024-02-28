@@ -3,14 +3,17 @@ package main
 import (
 	"bufio"
 	"context"
+	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/homedir"
 	"k8s.io/client-go/util/retry"
 )
 
@@ -30,21 +33,37 @@ func prompt() {
 
 // outside perspective
 func main() {
-	rules := clientcmd.NewDefaultClientConfigLoadingRules()
-	kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, &clientcmd.ConfigOverrides{})
-	config, err := kubeconfig.ClientConfig()
+	// rules := clientcmd.NewDefaultClientConfigLoadingRules()
+	// kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, &clientcmd.ConfigOverrides{})
+	// config, err := kubeconfig.ClientConfig()
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// clientset := kubernetes.NewForConfigOrDie(config)
+
+	// nodeList, err := clientset.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// for _, n := range nodeList.Items {
+	// 	fmt.Println(n.Name)
+	// }
+	var kubeconfig *string
+	if home := homedir.HomeDir(); home != "" {
+		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
+	} else {
+		kubeconfig = flag.String("kubeconfig", "", "absolute path to kubeconfig file")
+	}
+	flag.Parse()
+
+	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
 		panic(err)
 	}
-	clientset := kubernetes.NewForConfigOrDie(config)
-
-	nodeList, err := clientset.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
+	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		panic(err)
-	}
-
-	for _, n := range nodeList.Items {
-		fmt.Println(n.Name)
 	}
 
 	deploymentsClient := clientset.AppsV1().Deployments(corev1.NamespaceDefault)
