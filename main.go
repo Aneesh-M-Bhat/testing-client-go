@@ -33,22 +33,6 @@ func prompt() {
 
 // outside perspective
 func main() {
-	// rules := clientcmd.NewDefaultClientConfigLoadingRules()
-	// kubeconfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, &clientcmd.ConfigOverrides{})
-	// config, err := kubeconfig.ClientConfig()
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// clientset := kubernetes.NewForConfigOrDie(config)
-
-	// nodeList, err := clientset.CoreV1().Nodes().List(context.Background(), metav1.ListOptions{})
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	// for _, n := range nodeList.Items {
-	// 	fmt.Println(n.Name)
-	// }
 	var kubeconfig *string
 	if home := homedir.HomeDir(); home != "" {
 		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
